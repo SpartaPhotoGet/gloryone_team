@@ -70,7 +70,7 @@ public class JwtUtil {
 
         long time = type.equals("Access") ? ACCESS_TIME : REFRESH_TIME;
 
-        return Jwts.builder()
+        return BEARER_TYPE+Jwts.builder()
                 .setSubject(userId)
                 .setExpiration(new Date(date.getTime() + time))
                 .setIssuedAt(date)

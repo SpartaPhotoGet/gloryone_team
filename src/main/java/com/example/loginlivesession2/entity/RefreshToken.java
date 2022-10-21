@@ -20,11 +20,11 @@ public class RefreshToken {
     @NotBlank
     private String refreshToken;
     @NotBlank
-    private String memberId;
+    private String userId;
 
     public RefreshToken(String token, String userId) {
         this.refreshToken = token;
-        this.memberId = userId;
+        this.userId = userId;
     }
 
     public RefreshToken updateToken(String token) {

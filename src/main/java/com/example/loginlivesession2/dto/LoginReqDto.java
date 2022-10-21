@@ -11,17 +11,9 @@ public class LoginReqDto {
 
     @NotBlank
     private String userId;
+
     @NotBlank
     private String password;
-
-    @NotBlank
-    private String passwordCheck;
-
-    public LoginReqDto(String userId, String password, String passwordCheck) {
-        this.userId = userId;
-        this.password = password;
-        this.passwordCheck = passwordCheck;
-    }
 
 }
 

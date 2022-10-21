@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -23,9 +24,19 @@ public class Folder {
     private String folderName;
 
     @Column(nullable = false)
-    private Date date;
+    private String date;
+
+    @Column
+    private String tag;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    public Folder(String folderName, String date, String tag, Member member) {
+        this.folderName = folderName;
+        this.date = date;
+        this.tag = tag;
+        this.member = member;
+    }
 }

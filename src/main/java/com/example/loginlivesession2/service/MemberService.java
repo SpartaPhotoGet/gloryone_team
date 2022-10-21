@@ -29,7 +29,7 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
-    public ResponseDto<?> signup(MemberReqDto memberReqDto) {
+    public String signup(MemberReqDto memberReqDto) {
         // userId 중복 검사
         if(memberRepository.findByUserId(memberReqDto.getUserId()).isPresent()){
             throw new RequestException(ErrorCode.USERID_DUPLICATION_409);
@@ -39,11 +39,11 @@ public class MemberService {
         Member Member = new Member(memberReqDto);
 
         memberRepository.save(Member);
-        return ResponseDto.success("Success signup");
+        return "회원가입완료";
     }
 
     @Transactional
-    public ResponseDto<?> login(LoginReqDto loginReqDto, HttpServletResponse response) {
+    public String login(LoginReqDto loginReqDto, HttpServletResponse response) {
 
         // Member 저장소 내 userId가 없음
         Member account = memberRepository.findByUserId(loginReqDto.getUserId()).orElseThrow(
@@ -55,20 +55,20 @@ public class MemberService {
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(loginReqDto.getUserId());
 
         if(refreshToken.isPresent()) {
-            refreshTokenRepository.save(refreshToken.get().updateToken(tokenDto.getRefreshToken()));
+            refreshTokenRepository.save(refreshToken.get().updateToken(tokenDto.getRefresh_Token()));
         }else {
-            RefreshToken newToken = new RefreshToken(tokenDto.getRefreshToken(), loginReqDto.getUserId());
+            RefreshToken newToken = new RefreshToken(tokenDto.getRefresh_Token(), loginReqDto.getUserId());
             refreshTokenRepository.save(newToken);
         }
 
         setHeader(response, tokenDto);
 
-        return ResponseDto.success("Success Login");
+        return "로그인 완료!";
 
     }
 
     private void setHeader(HttpServletResponse response, TokenDto tokenDto) {
-        response.addHeader(JwtUtil.ACCESS_TOKEN, tokenDto.getAccessToken());
-        response.addHeader(JwtUtil.REFRESH_TOKEN, tokenDto.getRefreshToken());
+        response.addHeader(JwtUtil.ACCESS_TOKEN, tokenDto.getAuthorization());
+        response.addHeader(JwtUtil.REFRESH_TOKEN, tokenDto.getAuthorization());
     }
 }

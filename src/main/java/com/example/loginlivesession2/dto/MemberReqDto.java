@@ -14,10 +14,8 @@ public class MemberReqDto {
     @NotBlank
     private String password;
 
-    public MemberReqDto(String userId, String password) {
-        this.userId = userId;
-        this.password = password;
-    }
+    @NotBlank
+    private String passwordConfirm;
 
     public void setEncodePwd(String encodePwd) {
         this.password = encodePwd;
