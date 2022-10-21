@@ -1,6 +1,7 @@
 package com.example.loginlivesession2.jwt.filter;
 
-import com.example.loginlivesession2.global.dto.GlobalResDto;
+import com.example.loginlivesession2.exception.ErrorCode;
+import com.example.loginlivesession2.global.ResponseDto;
 import com.example.loginlivesession2.jwt.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,31 +31,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if(accessToken != null) {
             if(!jwtUtil.tokenValidation(accessToken)){
-                jwtExceptionHandler(response, "AccessToken Expired", HttpStatus.BAD_REQUEST);
+                jwtExceptionHandler(response);
                 return;
             }
-            setAuthentication(jwtUtil.getEmailFromToken(accessToken));
+            setAuthentication(jwtUtil.getUserId(accessToken));
         }else if(refreshToken != null) {
             if(!jwtUtil.refreshTokenValidation(refreshToken)){
-                jwtExceptionHandler(response, "RefreshToken Expired", HttpStatus.BAD_REQUEST);
+                jwtExceptionHandler(response);
                 return;
             }
-            setAuthentication(jwtUtil.getEmailFromToken(refreshToken));
+            setAuthentication(jwtUtil.getUserId(refreshToken));
         }
 
         filterChain.doFilter(request,response);
     }
 
-    public void setAuthentication(String email) {
-        Authentication authentication = jwtUtil.createAuthentication(email);
+    public void setAuthentication(String UserId) {
+        Authentication authentication = jwtUtil.createAuthentication(UserId);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    public void jwtExceptionHandler(HttpServletResponse response, String msg, HttpStatus status) {
-        response.setStatus(status.value());
+    public void jwtExceptionHandler(HttpServletResponse response) {
         response.setContentType("application/json");
         try {
-            String json = new ObjectMapper().writeValueAsString(new GlobalResDto(msg, status.value()));
+            String json = new ObjectMapper().writeValueAsString(ResponseDto.fail(ErrorCode.JWT_BAD_TOKEN_401));
             response.getWriter().write(json);
         } catch (Exception e) {
             log.error(e.getMessage());

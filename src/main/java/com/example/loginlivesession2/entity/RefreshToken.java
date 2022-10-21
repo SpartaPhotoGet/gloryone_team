@@ -1,4 +1,4 @@
-package com.example.loginlivesession2.account.entity;
+package com.example.loginlivesession2.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,11 +20,11 @@ public class RefreshToken {
     @NotBlank
     private String refreshToken;
     @NotBlank
-    private String accountEmail;
+    private String memberId;
 
-    public RefreshToken(String token, String email) {
+    public RefreshToken(String token, String userId) {
         this.refreshToken = token;
-        this.accountEmail = email;
+        this.memberId = userId;
     }
 
     public RefreshToken updateToken(String token) {

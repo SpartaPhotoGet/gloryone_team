@@ -1,7 +1,7 @@
 package com.example.loginlivesession2.security.user;
 
-import com.example.loginlivesession2.account.entity.Account;
-import com.example.loginlivesession2.account.repository.AccountRepository;
+import com.example.loginlivesession2.entity.Member;
+import com.example.loginlivesession2.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final AccountRepository accountRepository;
+    private final MemberRepository memberRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
 
-        Account account = accountRepository.findByEmail(email).orElseThrow(
+        Member account = memberRepository.findByUserId(userId).orElseThrow(
                 () -> new RuntimeException("Not Found Account")
         );
 

@@ -1,8 +1,8 @@
 package com.example.loginlivesession2.jwt.util;
 
 
-import com.example.loginlivesession2.account.entity.RefreshToken;
-import com.example.loginlivesession2.account.repository.RefreshTokenRepository;
+import com.example.loginlivesession2.entity.RefreshToken;
+import com.example.loginlivesession2.repository.RefreshTokenRepository;
 import com.example.loginlivesession2.jwt.dto.TokenDto;
 import com.example.loginlivesession2.security.user.UserDetailsServiceImpl;
 import io.jsonwebtoken.Jwts;
@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -31,11 +32,12 @@ public class JwtUtil {
     private final UserDetailsServiceImpl userDetailsService;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    private static final long ACCESS_TIME = 10 * 1000L;
-    private static final long REFRESH_TIME = 60 * 1000L;
-    public static final String ACCESS_TOKEN = "Access_Token";
+    private static final long ACCESS_TIME = 100000 * 1000L;
+    private static final long REFRESH_TIME = 6000000 * 1000L;
+    public static final String ACCESS_TOKEN = "Authorization";
     public static final String REFRESH_TOKEN = "Refresh_Token";
 
+    public static final String BEARER_TYPE = "Bearer ";
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -50,22 +52,26 @@ public class JwtUtil {
 
     // header 토큰을 가져오는 기능
     public String getHeaderToken(HttpServletRequest request, String type) {
-        return type.equals("Access") ? request.getHeader(ACCESS_TOKEN) :request.getHeader(REFRESH_TOKEN);
+        String bearerToken = type.equals("Access") ? request.getHeader(ACCESS_TOKEN) :request.getHeader(REFRESH_TOKEN);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TYPE)) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 
     // 토큰 생성
-    public TokenDto createAllToken(String email) {
-        return new TokenDto(createToken(email, "Access"), createToken(email, "Refresh"));
+    public TokenDto createAllToken(String userId) {
+        return new TokenDto(createToken(userId, "Access"), createToken(userId, "Refresh"));
     }
 
-    public String createToken(String email, String type) {
+    public String createToken(String userId, String type) {
 
         Date date = new Date();
 
         long time = type.equals("Access") ? ACCESS_TIME : REFRESH_TIME;
 
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(userId)
                 .setExpiration(new Date(date.getTime() + time))
                 .setIssuedAt(date)
                 .signWith(key, signatureAlgorithm)
@@ -91,19 +97,19 @@ public class JwtUtil {
         if(!tokenValidation(token)) return false;
 
         // DB에 저장한 토큰 비교
-        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByAccountEmail(getEmailFromToken(token));
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(getUserId(token));
 
         return refreshToken.isPresent() && token.equals(refreshToken.get().getRefreshToken());
     }
 
     // 인증 객체 생성
-    public Authentication createAuthentication(String email) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+    public Authentication createAuthentication(String userId) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    // 토큰에서 email 가져오는 기능
-    public String getEmailFromToken(String token) {
+    // 토큰에서 userId 가져오는 기능
+    public String getUserId(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
     }
 
