@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // JWT 관련
-    JWT_BAD_TOKEN_401(HttpStatus.UNAUTHORIZED, "Token이 유효하지 않습니다."),
+    JWT_BAD_TOKEN_401(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
 
     // 회원가입 관련
     USERID_DUPLICATION_409(HttpStatus.CONFLICT, "이미 가입된 회원입니다."),

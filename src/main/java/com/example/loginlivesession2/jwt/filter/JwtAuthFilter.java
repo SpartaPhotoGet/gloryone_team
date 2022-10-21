@@ -53,8 +53,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     public void jwtExceptionHandler(HttpServletResponse response) {
         response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
         try {
-            String json = new ObjectMapper().writeValueAsString(ResponseDto.fail(ErrorCode.JWT_BAD_TOKEN_401));
+            String json = new ObjectMapper().writeValueAsString(ResponseDto.fails(HttpStatus.UNAUTHORIZED,"TOKEN이 만료되었습니다"));
             response.getWriter().write(json);
         } catch (Exception e) {
             log.error(e.getMessage());
